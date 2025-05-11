@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificador</title>
+    <style src="htpps://abelcraftok.github.io/inventario-ldp/style.css"></style>
+</head>
+<body>
+
+    <!-- Pestaña INICIO -->
+    <div id="inicio" class="container" style="max-width:100vw;max-height:100vh;padding:0;margin:0;box-shadow:none;border-radius:0;background:none;">
+        <textarea id="producjs-content" class="code-box">Cargando...</textarea>
+    </div>
+
+    <!-- btn -->
+    <div id="btn">
+        <button class="button principal" onclick="carga()">Carga</button>
+    </div>
+
+    <script>
+        function carga() {
+            const content = document.getElementById('producjs-content').value;
+            const blob = new Blob([content], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'produc.js';
+            a.click();
+
+            URL.revokeObjectURL(url);
+
+            window.location.href = "https://github.com/AbelCraftOk/inventario-ldp/upload/main";
+        }
+    
+        // Cargar el archivo JS externo y mostrar su contenido en la pestaña "inicio"
+        (function() {
+            var url = "https://abelcraftok.github.io/inventario-ldp/produc.js";
+            fetch(url)
+                .then(resp => resp.ok ? resp.text() : Promise.reject("No se pudo cargar el archivo"))
+                .then(text => {
+                    document.getElementById('producjs-content').value = text;
+                })
+                .catch(err => {
+                    document.getElementById('producjs-content').value = "Error: " + err;
+                });
+        })();
+    </script>
+</body>
+</html>
