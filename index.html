@@ -247,8 +247,61 @@ tr:last-child td {
         <button class="button principal" onclick="location.reload()">Volver al Inicio</button>
     </div>
 
-    <script src="produc.js"></script>
+    <script src="https://abelcraftok.github.io/inventario-ldp/produc.js"></script>
     <script>
+        // Función para resaltar productos próximos a vencer
+        async function resaltarProximosAVencer() {
+            try {
+            // Obtener la fecha actual desde la API
+            const response = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=America/Argentina/Buenos_Aires');
+            const data = await response.json();
+            const fechaActual = new Date(data.dateTime);
+
+            // Calcular el rango de 30 días
+            const rangoMaximo = new Date(fechaActual);
+            rangoMaximo.setDate(rangoMaximo.getDate() + 30);
+
+            // Filtrar productos con vencimiento dentro del rango
+            const proximosAVencer = stock.filter(producto => {
+                if (producto.vencimiento && producto.vencimiento !== "NO TIENE" && producto.vencimiento !== "NO ENCONTRADA") {
+                    const fechas = producto.vencimiento.split(" - ").map(fecha => {
+                        const match = fecha.match(/\d{2}\/\d{2}\/\d{4}/);
+                        return match ? new Date(match[0].split('/').reverse().join('-')) : null;
+                    }).filter(Boolean);
+                    return fechas.some(fecha => fecha >= fechaActual && fecha <= rangoMaximo);
+                }
+                return false;
+            });
+
+            // Mostrar los productos en la pestaña "inicio"
+            const contenedorInicio = document.getElementById('inicio');
+            const recuadroProximos = document.createElement('div');
+            recuadroProximos.className = 'recuadro';
+            recuadroProximos.innerHTML = `
+                <h2>Productos Próximos a Vencer</h2>
+                ${proximosAVencer.length > 0 ? `
+                    <ul>
+                        ${proximosAVencer.map(producto => `
+                            <li>
+                                <strong>Nombre:</strong> ${producto.nombre}<br>
+                                <strong>Marca:</strong> ${producto.marca}<br>
+                                <strong>Cantidad:</strong> ${producto.cantidad}<br>
+                                <strong>Vencimiento:</strong> ${producto.vencimiento}
+                                <div class="separator"></div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                ` : '<p>No hay productos próximos a vencer en los próximos 30 días.</p>'}
+            `;
+            contenedorInicio.appendChild(recuadroProximos);
+            } catch (error) {
+            console.error('Error al obtener la fecha actual o procesar los productos:', error);
+            }   
+        }
+
+        // Llamar a la función al cargar la página
+        document.addEventListener('DOMContentLoaded', resaltarProximosAVencer);        
+
         function cargarDatos() {
             let slot1 = document.getElementById("slot1").value;
             let slot2 = document.getElementById("slot2").value;
